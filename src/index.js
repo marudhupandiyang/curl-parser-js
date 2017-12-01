@@ -3,7 +3,7 @@
 var options = require('./options.js').default;
 
 
-const optionsRegex = /(--[a-zA-Z]+ '.*?')|(--[a-zA-Z]+)|(-[a-zA-Z]+? '.+?')|('?[a-z]+:\/\/.*?'+?)|("?[a-z]+:\/\/.*?"+?)/g
+const optionsRegex = /(--[a-zA-Z\-]+ '.*?')|(--[a-zA-Z\-]+)|(-[a-zA-Z\-]+? '.+?')|('?[a-z]+:\/\/.*?'+?)|("?[a-z]+:\/\/.*?"+?)/g
 
 const urlRegex = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)$/
 export function parse(command = '') {
@@ -35,6 +35,21 @@ export function parse(command = '') {
     var urlMatch = val.match(urlRegex);
     if (urlMatch && urlMatch.length > 0) {
       parsedOptions.url = urlMatch[0];
+
+      const paramPosition = parsedOptions.url.indexOf('?');
+      if ( paramPosition !== -1) {
+        let splitUrl = parsedOptions.url.substr(0, paramPosition);
+        let paramsStr = parsedOptions.url.substr(paramPosition+1);
+        let params = paramsStr.split('&') || [];
+        console.log(params);
+
+        parsedOptions.queryString = {};
+
+        params.forEach((param) => {
+          const splitParam = param.split("=");
+          parsedOptions.queryString[splitParam[0]] = splitParam[1];
+        });
+      }
       return;
     }
     // URL MATCHER ends
@@ -47,15 +62,26 @@ export function parse(command = '') {
       }
       const splitHeader = newVal.split(':');
       parsedOptions.headers[splitHeader[0].trim()] = splitHeader[1].trim();
-    } else if (val.startsWith('--data ') || val.startsWith('--data-ascii ') || val.startsWith('-d ') || val.startsWith('--data-raw ') || val.startsWith('--dta-urlencode ')) {
+    } else if (val.startsWith('--data ') || val.startsWith('--data-ascii ') || val.startsWith('-d ') || val.startsWith('--data-raw ') || val.startsWith('--dta-urlencode ') || val.startsWith('--data-binary ')) {
       let newVal = val.substr(val.indexOf(' ')).trim();
       if (['\'','"'].includes(newVal[0])) {
         newVal = newVal.substr(1, newVal.length - 2);
       }
-      parsedOptions.data = newVal;
+      parsedOptions.body = newVal;
     }
     // Other options ends
   }); // parse over matches ends
+
+  if (parsedOptions.body && parsedOptions.headers['content-type'] && parsedOptions.headers['content-type'].indexOf('application/json') !== -1) {
+    try {
+      parsedOptions.body.replace('\\"','"');
+      parsedOptions.body.replace("\\'","'");
+      parsedOptions.body = JSON.parse(parsedOptions.body);
+    } catch(ex){
+      // ignore json conversion error..
+      console.log('Cannot parse JSON Data ' + ex.message);
+    }
+  }
 
   return parsedOptions;
 }
