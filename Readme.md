@@ -1,4 +1,4 @@
-# curl-parser
+# curl-parser-js
 
   Simple javascript library to parse `cUrl command` to `json object`. Regex based matching without adding any complex parser code/library. Can be used in `Node`, in any `frontend project` or as `standalone js file`.
 
@@ -8,7 +8,7 @@
 
   ### Node/frontend projects who support modules importing.
 
-    import Curlparser from 'curl-parser';
+    import Curlparser from 'curl-parser-js';
     
     Assume you have your `cUrl` command as a string constant
 
