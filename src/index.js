@@ -19,7 +19,7 @@ const isDataOption = str => isMatchingOption(['--data ', '--data-ascii ', '-d ',
 const removeLeadingTrailingQuotes = (str) => {
   const quotes = ['\'', '"'];
   const newStr = str.trim();
-  return quotes.includes(newStr) ? newStr.substr(1, newStr.length - 2) : newStr;
+  return quotes.includes(newStr[0]) ? newStr.substr(1, newStr.length - 2) : newStr;
 };
 
 const subStrFrom = (val, startFromVal) => {
@@ -27,22 +27,20 @@ const subStrFrom = (val, startFromVal) => {
   return val.substr(dataPosition);
 };
 
-const hasBody = parsedCommand => (!!parsedCommand.body);
 const isJsonRequest = parsedCommand => (parsedCommand.headers[contentTypeHeader] &&
   parsedCommand.headers[contentTypeHeader].indexOf(jsonMimeType) !== -1);
 
-const parseBodyByContentType = (val) => {
-  if (hasBody(val) && isJsonRequest(val)) {
-    const bodyData = `${val}`;
+const parseBodyByContentType = ({ body, headers }) => {
+  if (body && isJsonRequest(headers)) {
     try {
-      const cleanedBodyData = bodyData.replace('\\"', '"').replace("\\'", "'");
+      const cleanedBodyData = body.replace('\\"', '"').replace("\\'", "'");
       return JSON.parse(cleanedBodyData);
     } catch (ex) {
       // ignore json conversion error..
       console.log('Cannot parse JSON Data ' + ex.message); // eslint-disable-line
     }
   }
-  return val;
+  return body;
 };
 
 const parseOptionValue = (val) => {
@@ -70,9 +68,8 @@ const parseQueryStrings = (url) => {
 };
 
 const parseUrlOption = (val) => {
-  const urlMatches = val.match(urlRegex);
-
-  if (urlMatches && urlMatches.length > 0) {
+  const urlMatches = val.match(urlRegex) || [];
+  if (urlMatches.length) {
     const url = urlMatches[0]; // eslint-disable-line
     return {
       url,
@@ -85,7 +82,10 @@ const parseUrlOption = (val) => {
 const parseBody = val => removeLeadingTrailingQuotes(subStrFrom(val, ' '));
 
 const isACurlCommand = val => val.trim().startsWith('curl ');
-const isAUrlOption = val => val.match(urlRegex).length > 0;
+const isAUrlOption = (val) => {
+  const matches = val.match(urlRegex) || [];
+  return !!matches.length;
+};
 
 /*
  * Parse cUrl command to a JSON structure
@@ -122,7 +122,7 @@ export function parse(command) {
 
     // should be checked after all the options are analyzed
     // so that we guarentee that we have content-type header
-    parsedCommand.body = parseBodyByContentType(parsedCommand.body);
+    parsedCommand.body = parseBodyByContentType(parsedCommand);
   }
 
   return parsedCommand;

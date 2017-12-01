@@ -18,7 +18,7 @@
   "author": "marudhupandiyang@gmail.com",
   "license": "MIT",
   "dependencies": {},
-  "main": "dist/parse-curl.js",
+  "main": "dist/parse-curl-js.js",
   "module": "src/index.js",
   "devDependencies": {
     "babel-core": "^6.26.0",
