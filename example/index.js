@@ -1,4 +1,4 @@
-'use strict';
+
 
 const parsecurl = require('curl-parser-js').default;
 
@@ -16,7 +16,7 @@ const parsecurl = require('curl-parser-js').default;
 // const cmd = `curl 'https://exampleserver.com/api/v1/save_week/' -H 'origin: https://exampleserver.com' -H 'accept-encoding: gzip, deflate, br' -H 'accept-language: en-GB,en-US;q=0.8,en;q=0.6' -H 'authorization: JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2ZXJzaW9uIjoiMjciLCJleHAiOjE1MTIyMTIyNzYsIm9yaWdfaWF0IjoxNTEyMTI1ODc2LCJ1c2VyX2lkIjo1MTAsImVtYWlsIjoibWFydWRodS5ndW5hc2VrYXJhbkBnYWxlcGFydG5lcnMuY29tIiwidXNlcm5hbWUiOiJtYXJ1ZGh1Lmd1bmFzZWthcmFuQGdhbGVwYXJ0bmVycy5jb20ifQ._Buw7yRBRRVBpdJ__2CK6w8DEhoocRMAxWYnRTmNcW0' -H 'content-type: application/json; charset=UTF-8' -H 'accept: */*' -H 'referer: https://exampleserver.com/timeSheetChange' -H 'authority: exampleserver.com' -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36' --data-binary '{"data":[{"SatH":"Sat 2","timesheetTotal":{"SunTotal":0,"WeekTotal":40,"TueTotal":8,"MonTotal":8,"WedTotal":8,"SatTotal":0,"ThuTotal":8,"FriTotal":8},"projects":[{"id":-2,"name":"","client":"GALE Partners","project_id":255750,"isBilled":true,"days":{"MonT":"8","TueT":"8","WedT":"8","ThuT":"8","FriT":"8","SatT":"","SunT":"","MonM":"alchemy","TueM":"alchemy","WedM":"alchemy","ThuM":"alchemy","FriM":"alchemy","SatM":"","SunM":""},"totT":40}],"MonH":"Mon 27","FriH":"Fri 1","SunH":"Sun 3","weekString":"November 27, 2017 - December 03, 2017","WedH":"Wed 29","ThuH":"Thu 30","TueH":"Tue 28"}]}' --compressed`;
 
 
-const cmd = `curl 'http://server.com:5050/a/c/getName/?param1=pradeep&param2=kumar&param3=sharma'`;
+const cmd = 'curl \'http://server.com:5050/a/c/getName/?param1=pradeep&param2=kumar&param3=sharma\'';
 
 // const cmd = `curl 'http://server.com:5050/a/c/getName'`;
 

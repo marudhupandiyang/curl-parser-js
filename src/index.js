@@ -1,81 +1,131 @@
 const optionsRegex = /(--[a-zA-Z\-]+ '.*?')|(--[a-zA-Z\-]+)|(-[a-zA-Z\-]+? '.+?')|('?[a-z]+:\/\/.*?'+?)|("?[a-z]+:\/\/.*?"+?)/g; // eslint-disable-line
 const urlRegex = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)$/; // eslint-disable-line
 
-export function parse(command = '') {
-  const trimmedCmd = command.trim();
+const contentTypeHeader = 'content-type';
+const jsonMimeType = 'application/json';
 
-  const parsedOptions = {
-    url: '',
-    headers: {},
-  };
-
-  // quit if the command does not starts with curl
-  if (trimmedCmd.indexOf('curl') !== 0) {
-    console.error('Not a valid curl command'); // eslint-disable-line
-    return parsedOptions;
+const isMatchingOption = (headers, str) => {
+  for (let i = 0; i < headers.length; i += 1) {
+    if (str.startsWith(headers[i])) {
+      return true;
+    }
   }
+  return false;
+};
 
-  const matches = trimmedCmd.match(optionsRegex);
+const isAHeaderOption = str => isMatchingOption(['-H ', '--headers '], str);
+const isDataOption = str => isMatchingOption(['--data ', '--data-ascii ', '-d ', '--data-raw ', '--dta-urlencode ', '--data-binary '], str);
 
-  matches.forEach((val = '') => {
-    let trimmedVal = val.trim();
+const removeLeadingTrailingQuotes = (str) => {
+  const quotes = ['\'', '"'];
+  const newStr = str.trim();
+  return quotes.includes(newStr) ? newStr.substr(1, newStr.length - 2) : newStr;
+};
 
-    // URL MATCHER starts
-    if (['\'', '"'].includes(trimmedVal[0])) {
-      trimmedVal = trimmedVal.substr(1, trimmedVal.length - 2);
-    }
+const subStrFrom = (val, startFromVal) => {
+  const dataPosition = val.indexOf(startFromVal);
+  return val.substr(dataPosition);
+};
 
-    const urlMatch = trimmedVal.match(urlRegex);
-    if (urlMatch && urlMatch.length > 0) {
-      parsedOptions.url = urlMatch[0]; // eslint-disable-line
+const hasBody = parsedCommand => (!!parsedCommand.body);
+const isJsonRequest = parsedCommand => (parsedCommand.headers[contentTypeHeader] &&
+  parsedCommand.headers[contentTypeHeader].indexOf(jsonMimeType) !== -1);
 
-      const paramPosition = parsedOptions.url.indexOf('?');
-      if (paramPosition !== -1) {
-        // const splitUrl = parsedOptions.url.substr(0, paramPosition);
-        const paramsStr = parsedOptions.url.substr(paramPosition + 1);
-        const params = paramsStr.split('&') || [];
-
-        parsedOptions.queryString = {};
-
-        params.forEach((param) => {
-          const splitParam = param.split('='); // eslint-disable-line
-          parsedOptions.queryString[splitParam[0]] = splitParam[1]; // eslint-disable-line
-        });
-      }
-      return;
-    }
-    // URL MATCHER ends
-
-    // Other options starts
-    if (trimmedVal.startsWith('-H ') || trimmedVal.startsWith('--headers ')) {
-      let newVal = trimmedVal.substr(trimmedVal.indexOf(' ')).trim();
-      if (['\'', '"'].includes(newVal[0])) {
-        newVal = newVal.substr(1, newVal.length - 2);
-      }
-      const splitHeader = newVal.split(':');
-      parsedOptions.headers[splitHeader[0].trim()] = splitHeader[1].trim();
-    } else if (trimmedVal.startsWith('--data ') || trimmedVal.startsWith('--data-ascii ') || trimmedVal.startsWith('-d ') || trimmedVal.startsWith('--data-raw ') || trimmedVal.startsWith('--dta-urlencode ') || trimmedVal.startsWith('--data-binary ')) {
-      let newVal = trimmedVal.substr(trimmedVal.indexOf(' ')).trim();
-      if (['\'', '"'].includes(newVal[0])) {
-        newVal = newVal.substr(1, newVal.length - 2);
-      }
-      parsedOptions.body = newVal;
-    }
-    // Other options ends
-  }); // parse over matches ends
-
-  if (parsedOptions.body && parsedOptions.headers['content-type'] && parsedOptions.headers['content-type'].indexOf('application/json') !== -1) {
+const parseBodyByContentType = (val) => {
+  if (hasBody(val) && isJsonRequest(val)) {
+    const bodyData = `${val}`;
     try {
-      parsedOptions.body.replace('\\"', '"');
-      parsedOptions.body.replace("\\'", "'");
-      parsedOptions.body = JSON.parse(parsedOptions.body);
+      const cleanedBodyData = bodyData.replace('\\"', '"').replace("\\'", "'");
+      return JSON.parse(cleanedBodyData);
     } catch (ex) {
       // ignore json conversion error..
       console.log('Cannot parse JSON Data ' + ex.message); // eslint-disable-line
     }
   }
+  return val;
+};
 
-  return parsedOptions;
+const parseOptionValue = (val) => {
+  const headerSplit = subStrFrom(val, ' ').split(':');
+  return {
+    key: headerSplit[0].trim(),
+    value: headerSplit[1].trim(),
+  };
+};
+
+const parseQueryStrings = (url) => {
+  const paramPosition = url.indexOf('?');
+  const queryStrings = {};
+  if (paramPosition !== -1) {
+    // const splitUrl = parsedCommand.url.substr(0, paramPosition);
+    const paramsString = url.substr(paramPosition + 1);
+    const params = paramsString.split('&') || [];
+
+    params.forEach((param) => {
+          const splitParam = param.split('='); // eslint-disable-line
+          queryStrings[splitParam[0]] = splitParam[1]; // eslint-disable-line
+    });
+  }
+  return queryStrings;
+};
+
+const parseUrlOption = (val) => {
+  const urlMatches = val.match(urlRegex);
+
+  if (urlMatches && urlMatches.length > 0) {
+    const url = urlMatches[0]; // eslint-disable-line
+    return {
+      url,
+      queryStrings: parseQueryStrings(url),
+    };
+  }
+  return { url: '', queryStrings: {} };
+};
+
+const parseBody = val => removeLeadingTrailingQuotes(subStrFrom(val, ' '));
+
+const isACurlCommand = val => val.trim().startsWith('curl ');
+const isAUrlOption = val => val.match(urlRegex).length > 0;
+
+/*
+ * Parse cUrl command to a JSON structure
+ * params:
+ * command - cUrl command as a string.
+ * return JSON object
+*/
+export function parse(command) {
+  if (!command) { return ''; }
+
+  const parsedCommand = {
+    url: '',
+  };
+
+  // quit if the command does not starts with curl
+  if (isACurlCommand(command)) {
+    const matches = command.match(optionsRegex);
+    matches.forEach((val) => {
+      const option = removeLeadingTrailingQuotes(val);
+      if (isAUrlOption(option)) {
+        const { url, queryStrings } = parseUrlOption(option);
+        parsedCommand.url = url;
+        parsedCommand.queryStrings = queryStrings;
+      } else if (isAHeaderOption(option)) {
+        const { key, value } = parseOptionValue(option);
+        parsedCommand.headers = parsedCommand.headers || {};
+        parsedCommand.headers[key] = value;
+      } else if (isDataOption(option)) {
+        parsedCommand.body = parseBody(option);
+      } else {
+        console.log(`Skipped Header ${val}`); // eslint-disable-line
+      }
+    }); // parse over matches ends
+
+    // should be checked after all the options are analyzed
+    // so that we guarentee that we have content-type header
+    parsedCommand.body = parseBodyByContentType(parsedCommand.body);
+  }
+
+  return parsedCommand;
 }
 
 export default parse;
