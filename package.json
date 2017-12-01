@@ -1,0 +1,23 @@
+{
+  "name": "curl-parser",
+  "description": "Parse curl commands to json object",
+  "version": "0.0.1",
+  "keywords": [
+    "parse-curl",
+    "curl"
+  ],
+  "scripts": {
+    "start": "webpack --config webpack.config.js",
+    "dev": "webpack --config webpack.config.js --watchgit"
+  },
+  "author": "marudhupandiyang@gmail.com",
+  "license": "MIT",
+  "dependencies": {},
+  "main": "dist/parse-curl.js",
+  "module": "src/index.js",
+  "devDependencies": {
+    "lodash": "^4.17.4",
+    "path": "^0.12.7",
+    "webpack": "^3.9.1"
+  }
+}
