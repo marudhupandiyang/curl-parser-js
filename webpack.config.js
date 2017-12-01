@@ -27,6 +27,12 @@ module.exports = {
         loader: "eslint-loader",
         options: {}
       },
+      {
+        test: /\.(js)$/,
+        exclude: /node_modules/,
+        loader: "babel-loader"
+      }
+
     ],
   },
   "plugins": [
