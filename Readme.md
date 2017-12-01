@@ -1,10 +1,24 @@
 # curl-parser-js
   **Final javascript size is 2.58kB only!!**
+
   Simple javascript library to parse `cUrl command` to `json object`. Regex based matching without adding any complex parser code/library. Can be used in `Node`, in any `frontend project` or as `standalone js file`.
 
   With the generated json object you may construct your own `ajax` call using your `favourite` library.
 
   ## Usage
+
+  ### Standalone
+
+  Add your script tag
+
+      <script src="https://cdn.jsdelivr.net/npm/curl-parser-js@0.0.3/dist/parse-curl.js"></script>
+
+  Parse your cmd
+
+      const curlCmd = `curl 'http://server.com:5050/a/c/getName/?param1=pradeep&param2=kumar&param3=sharma'`;
+      parse_curl_js.parse(curlCmd);
+
+  Standalone Demo on [Codepen](https://codepen.io/marudhupandiyang/pen/jaXRYp?editors=0010)
 
   ### Node/frontend projects who support modules importing.
 
@@ -68,7 +82,6 @@
         "data": "November 27, 2017 - December 03, 2017"
       }
     }
-
 
    ## Roadmap
 
