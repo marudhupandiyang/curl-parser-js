@@ -10,11 +10,8 @@
     "start": "webpack --config webpack.config.js",
     "dev": "webpack --config webpack.config.js --watchgit"
   },
-<<<<<<< HEAD
   "author": "marudhupandiyang@gmail.com",
   "license": "MIT",
-=======
->>>>>>> init module
   "dependencies": {},
   "main": "dist/parse-curl.js",
   "module": "src/index.js",
@@ -24,7 +21,3 @@
     "webpack": "^3.9.1"
   }
 }
-<<<<<<< HEAD
-=======
-git
->>>>>>> init module
