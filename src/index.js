@@ -14,7 +14,7 @@ const isMatchingOption = (headers, str) => {
 };
 
 const isAHeaderOption = str => isMatchingOption(['-H ', '--headers '], str);
-const isDataOption = str => isMatchingOption(['--data ', '--data-ascii ', '-d ', '--data-raw ', '--dta-urlencode ', '--data-binary '], str);
+const isDataOption = str => isMatchingOption(['--data ', '--data-ascii ', '-d ', '--data-raw ', '--data-urlencode ', '--data-binary '], str);
 
 const removeLeadingTrailingQuotes = (str) => {
   const quotes = ['\'', '"'];
