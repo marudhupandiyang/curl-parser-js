@@ -19,12 +19,12 @@ const isDataOption = str => isMatchingOption(['--data ', '--data-ascii ', '-d ',
 const removeLeadingTrailingQuotes = (str) => {
   const quotes = ['\'', '"'];
   const newStr = str.trim();
-  return quotes.includes(newStr[0]) ? newStr.substr(1, newStr.length - 2) : newStr;
+  return quotes.includes(newStr[0]) ? newStr.substring(1, newStr.length - 2) : newStr;
 };
 
 const subStrFrom = (val, startFromVal) => {
   const dataPosition = val.indexOf(startFromVal);
-  return val.substr(dataPosition);
+  return val.substring(dataPosition);
 };
 
 const isJsonRequest = parsedCommand => (parsedCommand.headers[contentTypeHeader] &&
@@ -56,7 +56,7 @@ const parseQueryStrings = (url) => {
   const queryStrings = {};
   if (paramPosition !== -1) {
     // const splitUrl = parsedCommand.url.substr(0, paramPosition);
-    const paramsString = url.substr(paramPosition + 1);
+    const paramsString = url.substring(paramPosition + 1);
     const params = paramsString.split('&') || [];
 
     params.forEach((param) => {
