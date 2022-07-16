@@ -22,7 +22,7 @@
 
   ### Node/frontend projects who support modules importing.
 
-    import Curlparser from 'curl-parser-js';
+    import parsecurl from 'curl-parser-js';
 
     Assume you have your `cUrl` command as a string constant
 
