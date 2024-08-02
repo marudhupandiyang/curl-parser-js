@@ -11,7 +11,7 @@
 
   Add your script tag
 
-      <script src="https://cdn.jsdelivr.net/npm/curl-parser-js@0.0.3/dist/parse-curl.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/curl-parser-js@0.0.3/dist/parse-curl-js.js"></script>
 
   Parse your cmd
 
